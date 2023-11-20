@@ -1,0 +1,86 @@
+.App {
+
+  min-height: 100vh;
+
+}
+
+.Logo {
+  width: 25vmin;
+
+}
+
+.Pag {
+  margin: 2vh;
+
+}
+
+.Pag select {
+  width: 50%;
+}
+
+.Pag input {
+  width: 50%;
+}
+
+.Pag button {
+  margin-bottom: 1vh;
+}
+
+.Card {
+
+  margin-left: 10px;
+  display: flex;
+  flex-direction: row;
+
+}
+
+.Login {
+  margin-top: 5vh;
+  margin-left: 25vh;
+
+}
+
+.Login input {
+  width: 100%;
+}
+
+.Login img {
+  margin-bottom: 5vh;
+  
+}
+
+.Login form {
+  background: rgb(255,254,120);
+  background: linear-gradient(90deg, rgba(255,254,120,1) 0%, rgba(199,232,22,0.865983893557423) 31%, rgba(149,156,31,1) 100%);
+  padding: 5vh;
+  border-radius: 2vh;
+  width: 25%;
+}
+.LogoCione {
+  width: 25vmin;
+  margin-left: 8vh;
+
+}
+
+.Rel {
+  display: flex;
+  flex-direction: row;
+  margin: 2vh;
+  
+
+}
+
+.Rel select {
+  width: 100%;
+}
+
+.Rel input {
+  width: 100%;
+}
+
+.Rel button {
+  margin-bottom: 1vh;
+}
+.Rel form {
+  margin-right: 5vh;
+}

@@ -1,7 +1,7 @@
 const { QueryTypes } = require('sequelize');
 const { sequelize } = require('../models');
 
-class RegistroEntradaController {
+class RegistroSaidaController {
     async teste(req, res) {
         const registros = req.body
         console.log(registros)
@@ -14,7 +14,7 @@ class RegistroEntradaController {
             id = r.id
             ,	status = s.status 
             ,   tipo = t.tipo
-            ,	fornecedor = f.fornecedor
+            ,	cliente = c.cliente
             ,	motorista = m.NomeMotorista
             ,	placa = r.Placa
             ,	notafiscal = r.notafiscal
@@ -22,9 +22,9 @@ class RegistroEntradaController {
             ,	saida = convert(varchar,(r.saida),103)
             ,	assunto = r.Assunto
        
-            from RegistroRecebimento r
+            from RegistroSaida r
             join Status s on s.id = r.idStatus
-            join Fornecedor f on f.id = r.idFornecedor
+            join Cliente c on c.id = r.idCliente
             join Tipo t on t.id = r.idTipo
             join Motorista m on m.id = r.idMotorista
             where r.idStatus = 1
@@ -41,18 +41,18 @@ class RegistroEntradaController {
             Select     
                 id = r.id
                 ,	status = s.status 
-                ,   tipo = t.tipo
-                ,	fornecedor = f.fornecedor
+                ,	tipo = t.tipo
+                ,	cliente = c.Cliente
                 ,	motorista = m.NomeMotorista
                 ,	placa = r.Placa
                 ,	notafiscal = r.notafiscal
                 ,	entrada = convert(varchar,(r.entrada),103) 
                 ,	saida = convert(varchar,(r.saida),103)
                 ,	assunto = r.Assunto
-       
-            from RegistroRecebimento r
+                
+            from RegistroSaida r
             join Status s on s.id = r.idStatus
-            join Fornecedor f on f.id = r.idFornecedor
+            join Cliente c on c.id = r.idCliente
             join Tipo t on t.id = r.idTipo
             join Motorista m on m.id = r.idMotorista
             where idStatus = ${status}
@@ -63,14 +63,14 @@ class RegistroEntradaController {
         }
     }
     async inserirRegistro(req, res) {
-        const { tipo, fornecedor, procedencia, motorista, dataEntrada, notaFiscal, placa, observacao, idUsuario } = req.body
+        const { tipo, cliente, procedencia, motorista, dataEntrada, notaFiscal, placa, observacao, idUsuario } = req.body
         try {
             await sequelize.query(`
-                Insert into RegistroRecebimento (idTipo, idStatus, idFornecedor, idMotorista, Procedencia, Placa, Assunto, notafiscal, Entrada, idUsuarioInc, updatedAt, createdAt)
+                Insert into RegistroSaida (idTipo, idStatus, idCliente, idMotorista, Procedencia, Placa, Assunto, notafiscal, Entrada, idUsuarioInc, updatedAt, createdAt)
                         values(
                             '${tipo}' 
                         ,   '1'
-                        ,   '${fornecedor}'
+                        ,   '${cliente}'
                         ,   '${motorista}'
                         ,   '${procedencia}'
                         ,   '${placa}'
@@ -92,7 +92,7 @@ class RegistroEntradaController {
         const { observacao } = req.body
         try {
             await sequelize.query(`
-            update RegistroRecebimento set idStatus = 2, saida = getDate(), obs = '${observacao}', updatedAt= getDate() where id = ${parseInt(req.params.id)}
+            update RegistroSaida set idStatus = 2, saida = getDate(), obs = '${observacao}', updatedAt= getDate() where id = ${parseInt(req.params.id)}
         `, { type: QueryTypes.UPDATE })
             return res.status(200).send('Registro encerrado com sucesso !')
         } catch (err) {
@@ -104,7 +104,7 @@ class RegistroEntradaController {
         const { observacao } = req.body
         try {
             await sequelize.query(`
-                update RegistroRecebimento set idStatus = 3, saida = getDate(), obs = '${observacao}', updatedAt= getDate() where id = ${parseInt(req.params.id)}
+                update RegistroSaida set idStatus = 3, saida = getDate(), obs = '${observacao}', updatedAt= getDate() where id = ${parseInt(req.params.id)}
             `, { type: QueryTypes.UPDATE })
             return res.status(200).send('Registro cancelado com sucesso !')
 
@@ -114,5 +114,5 @@ class RegistroEntradaController {
     }
 
 }
-module.exports = new RegistroEntradaController()
+module.exports = new RegistroSaidaController()
 

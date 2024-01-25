@@ -68,7 +68,7 @@ const Motorista = (props) => {
     const atualizarMotorista = async (motorista) => {
         const res = window.confirm('Deseja alterar as informações deste Motorista?')
         if (res === true) {
-            await api.post('/motorista', motorista).then(response => {
+            await api.post('/motoristas', motorista).then(response => {
                 if (response.status === 200) {
                     alert(response.data)
                     window.location.reload()

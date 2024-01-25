@@ -50,7 +50,7 @@ function Visitante(props) {
             id: id,
             nome: nome,
             nascimento: nascimento,
-            cpf: cpf,
+            cpf: cpf.replace(/[.-]/g, ""),
             telefone: telefone,
             email: email
         }
@@ -133,9 +133,23 @@ function Visitante(props) {
     const abrirModal = () => {
         setModalAberta(true)
     }
-
+    const formatarCPF = (cpf)=> {
+        // Remove caracteres não numéricos
+        cpf = cpf.replace(/[^\d]/g, '');
+      
+        // Aplica a máscara do CPF
+        cpf = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+      
+        return cpf;
+      }
+      const handleCPFOChange = (e) => {
+        const novoCPF = formatarCPF(e.target.value);
+        setCpf(novoCPF);
+      };
+    
     return (
         <div className='Pag'>
+            <div><Form.Label>Cadastro - Visitante</Form.Label></div>
             <Modal show={modalAberta} onHide={fecharModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>Dados do Visitante</Modal.Title>
@@ -148,7 +162,7 @@ function Visitante(props) {
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formBasicPassword">
                             <Form.Label>CPF</Form.Label>
-                            <Form.Control type="text" placeholder="Digite o CPF do visitante" value={cpf} onChange={(e) => { setCpf(e.target.value) }} />
+                            <Form.Control type="text" placeholder="Digite o CPF do visitante" value={cpf} onChange={handleCPFOChange} />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formBasicPassword">
                             <Form.Label>Nome</Form.Label>

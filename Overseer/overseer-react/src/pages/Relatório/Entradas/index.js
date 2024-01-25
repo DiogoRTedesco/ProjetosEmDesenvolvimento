@@ -1,10 +1,12 @@
 import { PDFViewer } from '@react-pdf/renderer';
 import React, { useEffect, useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
-import { PDFDocument } from '../../../PDF/VisitantesPDF';
+import { PDFDocument } from '../../../PDF/RecebimentosPDF';
 import { api } from '../../../hooks/useApi';
 
-export const RelatorioVisitante = () => {
+
+
+export const RelatorioEntrada = () => {
     const [dados, setDados] = useState([]);
     const [entrada, setEntrada] = useState('');
     const [saida, setSaida] = useState('');
@@ -12,9 +14,9 @@ export const RelatorioVisitante = () => {
     const [show, setShow] = useState(false)
     const [dadosStatus, setDadosStatus] = useState([]);
     const token = sessionStorage.getItem('authToken')
-
-    const buscarRegistroVisitantes = async () => {
-        await api.post('/relatorioVisita', {
+    
+    const buscarRegistroEntradas = async () => {
+        await api.post('/relatorioRecebimentos', {
             entrada: entrada,
             saida: saida,
             status: status
@@ -77,11 +79,11 @@ export const RelatorioVisitante = () => {
 
                 </Form.Group>
 
-                <Button onClick={buscarRegistroVisitantes}>Buscar</Button>
+                <Button onClick={buscarRegistroEntradas}>Buscar</Button>
             </Form>
 
             <div style={{display:  show === false ? 'none': 'block'}}>
-                <h1>Relatório de Visitantes : Período : {entrada.replace(/-/g, "/")} - {saida.replace(/-/g, "/")}</h1>
+                <h1>Relatório de Entradas : Período : {entrada.replace(/-/g, "/")} - {saida.replace(/-/g, "/")}</h1>
                 <PDFViewer width="100%" height="600" fileName="Relatório de Visitantes.pdf">
                     <PDFDocument data={dados} />
                 </PDFViewer>

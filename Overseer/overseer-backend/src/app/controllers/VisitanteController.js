@@ -30,32 +30,11 @@ class VisitanteController {
         }
     }
 
-    async buscarVisitante(req, res) {
-        const { cpf } = req.body
-        try {
-            const buscarVisitante = await sequelize.query(`
-                select 
-                    id
-                ,   cpf
-                ,   nome
-                ,   dataEntrada = convert(varchar,getDate(),23)
-                from Visitantes
-                where cpf = '${cpf}'
-            `, { type: QueryTypes.SELECT });
-            if (buscarVisitante.length === 0) {
-                return res.status(204).send('Dados Inválidos')
-            } else {
-                console.log(buscarVisitante.length)
-                return res.status(200).send(buscarVisitante)
-            }
-        } catch (err) {
-            res.status(500).send(`Erro ao processar a requisão tente novamente ${err}`)
-        }
-    }
+    
 
     async inserirVisitante(req, res) {
         const { id, cpf, nome, nascimento, telefone, email } = req.body
-
+        
         try {
             if (id > 0) {
                  await sequelize.query(`
@@ -90,7 +69,7 @@ class VisitanteController {
             }
         } catch (err) {
             if(err.parent.code === 'EREQUEST'){
-                return res.status(409).send('CPF Cadastrado em nossa base de dados')
+               return res.status(409).send('CPF Cadastrado em nossa base de dados')
             }else{
                 return res.status(500).send('Erro ao processar requisição')
             }
@@ -106,8 +85,6 @@ class VisitanteController {
         if (!deleteVisitante) res.status(404).send('Visitante não encontrado.');
         return res.status(200).send('Visitante exluido')
     }
-
-
 
 
 }

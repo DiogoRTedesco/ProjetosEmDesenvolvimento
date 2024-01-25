@@ -15,6 +15,7 @@ const FornecedorController = require('./app/controllers/FornecedorController')
 const TipoController = require('./app/controllers/TipoController')
 const MotoristaController = require('./app/controllers/MotoristaController')
 const RegistroEntradaController = require('./app/controllers/RegistroEntradaController')
+const RegistroSaidaController = require('./app/controllers/RegistroSaidaController')
 
 
 
@@ -36,20 +37,20 @@ routes.delete('/usuarios/:id', UsuarioController.deletarUsuario)
 routes.get('/perfil', SessionController.verificarToken, PerfilController.show)
 routes.post('/perfil', PerfilController.inserirPerfil)
 routes.post('/perfil/:id',  PerfilController.consultarPerfil)
-routes.delete('/perfil/:id',  PerfilController.deletarPerfil)
+routes.delete('/perfil/:id',  PerfilController.deletarPerfil) 
 
 //Visitantes
 routes.get('/visitantes', SessionController.verificarToken, VisitanteController.show)
-routes.post('/visitante', VisitanteController.buscarVisitante)
 routes.post('/visitantes', VisitanteController.inserirVisitante)
+//routes.post('/visitantes13', VisitanteController.teste)
 routes.post('/visitantes/:id',  VisitanteController.consultarVisitante)
 routes.delete('/visitantes/:id',  VisitanteController.deletarVisitante)
 
 //Motorista
 routes.get('/motorista', SessionController.verificarToken, MotoristaController.show)
 //routes.post('/motoristas', MotoristaController.buscarMotorista)
-routes.post('/motoristas', MotoristaController.teste)
-//routes.post('/motoristas', MotoristaController.inserirMotorista)
+//routes.post('/motoristas', MotoristaController.teste);
+routes.post('/motoristas', MotoristaController.inserirMotorista)
 routes.post('/motoristas/:id',  MotoristaController.consultarMotorista)
 routes.delete('/motoristas/:id',  MotoristaController.deletarMotorista)
 
@@ -90,7 +91,18 @@ routes.post('/encerrarVisita/:id',  RegistroVisitaController.encerrarRegistro)
 routes.post('/cancelarVisita/:id',  RegistroVisitaController.cancelarRegistro)
 
 //Registro de Recebimento
-routes.post('/registroRecebimento', RegistroEntradaController.teste)
+routes.get('/registroRecebimento', SessionController.verificarToken, RegistroEntradaController.show)
+routes.post('/registroRecebimentos', RegistroEntradaController.showStatus)
+routes.post('/registroRecebimento', RegistroEntradaController.inserirRegistro)
+routes.post('/encerrarRecebimento/:id',  RegistroEntradaController.encerrarRegistro)
+routes.post('/cancelarRecebimento/:id',  RegistroEntradaController.cancelarRegistro)
+
+//Registro de Saídas
+routes.get('/registroSaida', SessionController.verificarToken, RegistroSaidaController.show)
+routes.post('/registroSaidas', RegistroSaidaController.showStatus)
+routes.post('/registroSaida', RegistroSaidaController.inserirRegistro)
+routes.post('/encerrarSaida/:id',  RegistroSaidaController.encerrarRegistro)
+routes.post('/cancelarSaida/:id',  RegistroSaidaController.cancelarRegistro)
 
 //Status
 routes.get('/status', SessionController.verificarToken, StatusController.show)
@@ -100,8 +112,12 @@ routes.get('/tipoE', SessionController.verificarToken, TipoController.showEntrad
 routes.get('/tipoS', SessionController.verificarToken, TipoController.showSaida)
 
 //Relatórios
-routes.post('/relatorioVisita', RelatorioController.show)
+routes.post('/relatorioVisita', RelatorioController.showVisitantes)
+routes.post('/relatorioRecebimentos', RelatorioController.showRecebimentos)
+routes.post('/relatorioSaidas', RelatorioController.showSaidas)
 routes.get('/contadorVisitas', RelatorioController.contadorVisitantes)
+routes.get('/contadorRecebimentos', RelatorioController.contadorRecebimentos)
+routes.get('/contadorSaidas', RelatorioController.contadorSaidas)
 
 
 module.exports = routes;

@@ -17,7 +17,10 @@ import Visitante from './pages/Cadastro/Visitantes';
 import Home from './pages/Home';
 import { Login } from './pages/Login';
 import { RegistroRecebimento } from './pages/Registro/Recebimento';
+import { RegistroSaida } from './pages/Registro/Saídas';
 import { RegistroVisitantes } from './pages/Registro/Visitante';
+import { RelatorioEntrada } from './pages/Relatório/Entradas';
+import { RelatorioSaida } from './pages/Relatório/Saidas';
 import { RelatorioVisitante } from './pages/Relatório/Visitantes';
 import Sobre from './pages/Sobre';
 
@@ -113,7 +116,10 @@ function Rotas() {
                 <Route path='/visitante' exact={true} element={<RequireAuth level={1}><Visitante /></RequireAuth>} />
                 <Route path='/visitantes' exact={true} element={<RequireAuth level={1}><RegistroVisitantes /></RequireAuth>} />
                 <Route path='/recebimento' exact={true} element={<RequireAuth level={1}><RegistroRecebimento /></RequireAuth>} />
+                <Route path='/saidas' exact={true} element={<RequireAuth level={1}><RegistroSaida /></RequireAuth>} />
                 <Route path='/relatorioVisitantes' exact={true} element={<RequireAuth level={1}><RelatorioVisitante /></RequireAuth>} />
+                <Route path='/relatorioRecebimento' exact={true} element={<RequireAuth level={1}><RelatorioEntrada /></RequireAuth>} />
+                <Route path='/relatorioSaidas' exact={true} element={<RequireAuth level={1}><RelatorioSaida /></RequireAuth>} />
                 <Route path='/motivo' exact={true} element={<RequireAuth level={3}><Motivo /></RequireAuth>} />
                 <Route path='/empresa' exact={true} element={<RequireAuth level={3}><Empresa /></RequireAuth>} />
                 <Route path='/cliente' exact={true} element={<RequireAuth level={3}><Cliente /></RequireAuth>} />

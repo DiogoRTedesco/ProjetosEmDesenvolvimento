@@ -32,13 +32,13 @@ export const RegistroRecebimento = () => {
 
     const token = sessionStorage.getItem('authToken');
     const auth = useContext(AuthContext);
-    console.log(dataEntrada)
+
 
     const submit = () => {
         const recebimento = {
             id: id,
             tipo: tipo,
-            forncededor: fornecedor,
+            fornecedor: fornecedor,
             procedencia: procedencia,
             motorista: idMotorista,
             dataEntrada: dataEntrada,
@@ -56,7 +56,7 @@ export const RegistroRecebimento = () => {
         }
     }
     const buscarRegistroRecebimento = async () => {
-        await api.get('/registrovisita', {
+        await api.get('/registroRecebimento', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -86,7 +86,7 @@ export const RegistroRecebimento = () => {
         }).then(err => { alert(err.response.data) })
     }
     const atualizaRegistroRecebimento = (recebimento) => {
-        api.post('/registroVisita', recebimento).then(response => {
+        api.post('/RegistroRecebimento', recebimento).then(response => {
             if (response.status === 200) {
                 fecharModal()
             }
@@ -127,7 +127,7 @@ export const RegistroRecebimento = () => {
     }));
 
     const buscarMotoristas = async () => {
-        const response = await api.get('/motoristas', {
+        const response = await api.get('/motorista', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -173,7 +173,7 @@ export const RegistroRecebimento = () => {
     }, [])
 
     const buscarRecebimentos = async () => {
-        await api.post('/registroRecebimento', {
+        await api.post('/registroRecebimentos', {
             status: status
         }).then(response => {
             setDados(response.data)
@@ -205,8 +205,8 @@ export const RegistroRecebimento = () => {
     const cancelarRegistro = async (nome, id) => {
         const res = window.confirm(`Deseja Cancelar o Recebimento? ${id} - ${nome} `)
         if (res === true) {
-            const resp = window.prompt('Informe o motivo do cancelamento da visita')
-            await api.post(`/cancelarVisita/${id}`, { observacao: resp }).then(response => {
+            const resp = window.prompt('Informe o motivo do cancelamento do Recebimento')
+            await api.post(`/cancelarRecebimento/${id}`, { observacao: resp }).then(response => {
                 if (response.status === 200) {
                     alert(response.data)
                     buscarRegistroRecebimento()
@@ -259,7 +259,7 @@ export const RegistroRecebimento = () => {
 
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="NomeMotorista">
+                        <Form.Group className="mb-3" controlId="Fornecedor">
                             <Form.Label>Fornecedor</Form.Label>
                             <Select options={optionsFornecedor} onChange={e => { setFornecedor(e.value) }} />
                             {/*na função onChange é utilizado apenas e.value por conta da função options, não segue a logica */}
@@ -381,8 +381,9 @@ export const RegistroRecebimento = () => {
                             <tr key={index}>
                                 <td>{rec.id}</td>
                                 <td>{rec.status}</td>
-                                <td>{rec.cpf}</td>
-                                <td>{rec.nome}</td>
+                                <td>{rec.tipo}</td>
+                                <td>{rec.fornecedor}</td>
+                                <td>{rec.motorista}</td>
                                 <td>{rec.entrada}</td>
                                 <td>{rec.saida}</td>
                                 <td>
@@ -411,11 +412,12 @@ export const RegistroRecebimento = () => {
                                                 className="rounded me-2"
                                                 alt=""
                                             />
-                                            <strong className="me-auto">Recebimento: {rec.nome}</strong>
+                                            <strong className="me-auto">Recebimento: {rec.fornecedor}</strong>
                                         </Toast.Header>
-                                        <Toast.Body>Empresa: {rec.empresa}</Toast.Body>
-                                        <Toast.Body>Motivo: {rec.motivo}</Toast.Body>
-                                        <Toast.Body>Visitado: {rec.visitado}</Toast.Body>
+                                        <Toast.Body>Procedência: {rec.procedencia}</Toast.Body>
+                                        <Toast.Body>Placa: {rec.placa}</Toast.Body>
+                                        <Toast.Body>Motivo: {rec.assunto}</Toast.Body>
+                                        <Toast.Body>Obs: {rec.obs}</Toast.Body>
                                     </Toast>
 
                                 </td>

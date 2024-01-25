@@ -1,86 +1,198 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Form, Modal, Table } from 'react-bootstrap';
+
+import React, { useContext, useEffect, useState } from "react";
+import { Button, Form, InputGroup, Modal, Table, Toast } from 'react-bootstrap';
+import Select from 'react-select';
+import { AuthContext } from "../../../contexts/Auth/AuthContext";
+import { InitialDatetime } from '../../../hooks/initialDatetime';
 import { api } from '../../../hooks/useApi';
-// import { Container } from './styles';
 
-function RegistroSaida(props) {
-    const [modalAberta, setModalAberta] = useState(false)
+
+export const RegistroSaida = () => {
+    const [modalPrincipal, setModalPrincipal] = useState(false);
     const [id, setId] = useState(0);
-    const [idVis, setIdVis] = useState(0);
-    const [tipo, setTipo] = useState(0)
-    const [cliente, setCliente] = useState('')
-    const [procedencia, setProcedencia] = useState('')
-    const [cpf, setCpf] = useState('')
-    const [placa, setPlaca] = useState('')
-    const [nFiscal, setNFiscal] = useState('')
-    const [dados, setDados] = useState([])
-    const token = sessionStorage.getItem('authToken')
-    
-    useEffect(() => {
-        buscarVistantes()
-    }, [])
+    const [idMotorista, setIdMotorista] = useState(0);//Modal Principal
+    const [dataEntrada, setDataEntrada] = useState(InitialDatetime);
+    const [tipo, setTipo] = useState(0);// Modal Principal
+    const [cliente, setCliente] = useState(0); // Modal Principal
+    const [procedencia, setProcedencia] = useState('');
+    const [observacao, setObservacao] = useState('');
+    const [notaFiscal, setNotaFiscal] = useState(''); 
+    const [placa, setPlaca] = useState(''); 
 
-    const buscarVistantes = async () => {
-        const response = await api.get('/saidas', {
+    const [clienteOptions, setClienteOptions] = useState([]);
+    const [motoristaOptions, setMotoristaOptions] = useState([]);
+    const [dadosStatus, setDadosStatus] = useState([]);
+    const [dadosTipo, setDadosTipos] = useState([]);
+    
+    const [status, setStatus] = useState(1);
+    const [busca, setBusca] = useState('');
+    const [dados, setDados] = useState([]);
+    const [showA, setShowA] = useState(false)
+    const [dadosFiltrados, setDadosFiltrados] = useState([])
+
+    const token = sessionStorage.getItem('authToken');
+    const auth = useContext(AuthContext);
+
+
+    const submit = () => {
+        const Saida = {
+            id: id,
+            tipo: tipo,
+            cliente: cliente,
+            procedencia: procedencia,
+            motorista: idMotorista,
+            dataEntrada: dataEntrada,
+            notaFiscal: notaFiscal,
+            placa: placa,
+            observacao : observacao,
+            idUsuario: auth.user.id,
+
+            
+        }
+        if (id === 0) {
+            cadastraRegistroSaida(Saida)
+        } else {
+            atualizaRegistroSaida(Saida)
+        }
+    }
+    const buscarRegistroSaida = async () => {
+        await api.get('/registroSaida', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        }).then().catch(err =>alert(err.response.data))
-        const data = await response.data
-        setDados(data)
-    }
-    const submit = (e) => {
-        e.preventDefault()
-        const visitante = {
-            id: id,
-            nome: nome,
-            nascimento: nascimento,
-            cpf: cpf,
-            telefone: telefone,
-            email: email
-        }
-        if (id === 0) {
-            inserirVisitante(visitante)
-        } else {
-            atualizaVisitante(visitante)
-        }
-        fecharModal()
-        //window.location.reload() 
+        })
+            .then(response => {
+                setDados(response.data)
+            }).catch(err => {
+                alert(err.response.data)
+            })
     }
 
-    const inserirVisitante = async (visitante) => {
-        const res = window.confirm('Deseja cadastrar o visitante?')
-        if (res === true) {
-            await api.post('/visitantes', visitante).then(response => {
-                alert(response.data)
+    useEffect(() => {
+        const filtrados = dados.filter((item) => {
+            const valores = Object.values(item).join(' ').toLowerCase();
+            const termoBusca = busca.toLowerCase().trim();
+            return valores.includes(termoBusca);
+        })
+        setDadosFiltrados(filtrados)
+    }, [busca, dados])
+
+    const cadastraRegistroSaida = (saida) => {
+        api.post('/registroSaida', saida).then(response => {
+            if (response.status === 200) {
+                fecharModal()
                 window.location.reload()
-            }).catch(err => { alert(err.response.data) })
-        } else {
-            fecharModal()
-        }
+            }
+        }).then(err => { alert(err.response.data) })
     }
-    const atualizaVisitante = async (visitante) => {
-        const res = window.confirm('Deseja alterar as informações deste visitante?')
+    const atualizaRegistroSaida = (saida) => {
+        api.post('/registroSaida', saida).then(response => {
+            if (response.status === 200) {
+                fecharModal()
+            }
+        }).catch(err => { alert(err.response.data) })
+    }
+    //Início Modal
+    const abrirModal = () => {
+        setModalPrincipal(true)
+    }
+    const fecharModal = () => {
+        setModalPrincipal(false)
+        setId(0)
+        setTipo(0)
+        setIdMotorista(0)
+        setDataEntrada(InitialDatetime)
+        setCliente(0)
+        setPlaca('')
+        setProcedencia('')
+        setNotaFiscal('')
+        setObservacao('')
+        
+    }
+
+    const buscarCliente = async () => {
+        const response = await api.get('/clientes', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then()
+            .catch(err => { alert(err.response.data) })
+        const data = await response.data
+        setClienteOptions(data)
+    }
+    const optionsCliente = clienteOptions.map((cliente) => ({
+        value: cliente.id,
+        label: `${cliente.id} - ${cliente.cliente}`,
+    }));
+
+    const buscarMotoristas = async () => {
+        const response = await api.get('/motorista', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then()
+            .catch(err => { alert(err.response.data) })
+        const data = await response.data
+        setMotoristaOptions(data)
+    }
+    const optionsMotorista = motoristaOptions.map((motorista) => ({
+        value: motorista.id,
+        label: `${motorista.NomeMotorista} - ${motorista.cpfMotorista}`,
+    }));
+
+    const buscarStatus = async () => {
+        const response = await api.get('/status', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then()
+            .catch(err => { alert(err.response.data) })
+        setDadosStatus(response.data)
+    }
+    const buscaTipo = async () => {
+        const response = await api.get('/tipoS', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+            .then()
+            .catch(err => { alert(err.response.data) })
+        setDadosTipos(response.data);
+    }
+
+    useEffect(() => {
+        buscarRegistroSaida()
+        buscarStatus()
+        buscaTipo()
+        buscarCliente()
+        buscarMotoristas()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    const buscarSaidas = async () => {
+        await api.post('/registroSaidas', {
+            status: status
+        }).then(response => {
+            setDados(response.data)
+        }).catch(err => { alert(err.response.data) })
+    }
+    const toggleShowA = () => { setShowA(!showA) }
+
+
+
+    const encerrarRegistro = async (nome, id) => {
+        const res = window.confirm(`Deseja encerrar a saída ${id} - ${nome} `)
+
         if (res === true) {
-            await api.post('/visitantes', visitante).then(response => {
+            //const resp = window.prompt('Informe alguma observação sobre o processo da visita')
+
+            await api.post(`/encerrarSaida/${id}`, ).then(response => {
                 if (response.status === 200) {
                     alert(response.data)
-                    window.location.reload()
-                } else {
-                    window.location.reload()
-                }
-            }).catch(err => { alert(err.response.data) })
-        } else {
-            fecharModal()
-        }
-    }
-    const deletarVisitante = async (nome, id) => {
-        const res = window.confirm(`Deseja excluir o visitante ${id} - ${nome} `)
-        if (res === true) {
-            await api.delete(`/visitantes/${id}`).then(response => {
-                if (response.status === 200) {
-                    alert(response.data)
-                    buscarVistantes()
+                    buscarRegistroSaida()
                     window.location.reload()
                 }
             }).catch(err => {
@@ -90,67 +202,126 @@ function RegistroSaida(props) {
             window.location.reload()
         }
     }
-    const carregarDados = async (id) => {
-        const response = await api.post(`/visitantes/${id}`)
-        const data = await response.data
-        data.map((vis, index) =>(
-            setId(vis.id)
-            , setNome(vis.nome)
-            , setNascimento(vis.nascimento)
-            , setCpf(vis.cpf)
-            , setTelefone(vis.telefone)
-            , setEmail(vis.email) 
-    ))
-        abrirModal()
+    const cancelarRegistro = async (nome, id) => {
+        const res = window.confirm(`Deseja Cancelar a Saída? ${id} - ${nome} `)
+        if (res === true) {
+            const resp = window.prompt('Informe o motivo do cancelamento da Saída')
+            await api.post(`/cancelarSaida/${id}`, { observacao: resp }).then(response => {
+                if (response.status === 200) {
+                    alert(response.data)
+                    buscarRegistroSaida()
+                    window.location.reload()
+                }
+            }).catch(err => {
+                alert(err.response.data)
+            })
+        } else {
+            window.location.reload()
+        }
     }
-
-    const fecharModal = () => {
-        setModalAberta(false)
-        setId(0)
-        setNome('')
-        setNascimento('')
-        setCpf('')
-        setTelefone('')
-        setEmail('')
-
-
-    }
-    const abrirModal = () => {
-        setModalAberta(true)
-    }
-
+    
     return (
         <div className='Pag'>
-            <Modal show={modalAberta} onHide={fecharModal}>
+            <div><Form.Label>Movimentos - Saidas</Form.Label></div>
+            <Modal fullscreen={true} show={modalPrincipal} onHide={fecharModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Dados do Visitante</Modal.Title>
+                    <Modal.Title>Registro de Entrada</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3" controlId="formBasicPassword">
                             <Form.Label>ID</Form.Label>
-                            <Form.Control type="text" disabled value={id} readOnly={true} />
+                            <Form.Control
+                                type="text"
+                                readOnly
+                                value={id}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" id="Tipo">
+                            <Form.Label>Tipo</Form.Label>
+                            <Form.Select onChange={e => { setTipo(e.target.value) }} >
+                                <option value={0}>Selecione</option>
+                                {[...dadosTipo].map((tipo, index) => (
+                                    <option key={index} value={tipo.id} >
+                                        {tipo.tipo}
+                                    </option>))}
+                            </Form.Select>
+                        </Form.Group>
+                        <Form.Group className="mb-3" id="Visita">
+                            <Form.Label>Entrada</Form.Label>
+                            <Form.Control
+                                type="datetime-local"
+                                value={dataEntrada}
+                                onChange={e=>{setDataEntrada(e.target.value)}}
+                               
+                            />
+
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="Cliente">
+                            <Form.Label>Cliente</Form.Label>
+                            <Select options={optionsCliente} onChange={e => { setCliente(e.value) }} />
+                            {/*na função onChange é utilizado apenas e.value por conta da função options, não segue a logica */}
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="NomeMotorista">
+                            <Form.Label>Motorista</Form.Label>
+                            <Select options={optionsMotorista} onChange={e => { setIdMotorista(e.value) }} />
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formBasicPassword">
-                            <Form.Label>CPF</Form.Label>
-                            <Form.Control type="text" placeholder="Digite o CPF do visitante" value={cpf} onChange={(e) => { setCpf(e.target.value) }} />
+                            <Form.Label>Placa</Form.Label>
+                            <InputGroup className="mb-3">
+                                <Form.Control
+                                    type="text"
+                                    value={placa}
+                                    onChange={e => {setPlaca(e.target.value.toUpperCase())}}
+                                    placeholder="Placa do Veículo"
+                                    autoComplete="off"
+                                    toUpperCase
+                                />
+                            </InputGroup>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3" controlId="formBasicPassword">
+                            <Form.Label>Procedência</Form.Label>
+                            <InputGroup className="mb-3">
+                                <Form.Control
+                                    type="text"
+                                    value={procedencia}
+                                    onChange={e => {setProcedencia(e.target.value.toUpperCase())}}
+                                    placeholder="Cidade de Origem da Empresa"
+                                    autoComplete="off"
+                                />
+                            </InputGroup>
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formBasicPassword">
-                            <Form.Label>Nome</Form.Label>
-                            <Form.Control type="text" placeholder="Digite o nome do visitante" value={nome} onChange={(e) => { setNome(e.target.value) }} />
+                            <Form.Label>Nota Fiscal</Form.Label>
+                            <InputGroup className="mb-3">
+                                <Form.Control
+                                    type="text"
+                                    value={notaFiscal}
+                                    onChange={e => {setNotaFiscal(e.target.value)}}
+                                    placeholder="Digite se possuir nota fiscal"
+                                    autoComplete="off"
+                                />
+                            </InputGroup>
                         </Form.Group>
+
                         <Form.Group className="mb-3" controlId="formBasicPassword">
-                            <Form.Label>Nascimento</Form.Label>
-                            <Form.Control type="date" placeholder="Digite o nome do visitante" value={nascimento} onChange={(e) => { setNascimento(e.target.value) }} />
+                            <Form.Label>Observação</Form.Label>
+                            <InputGroup className="mb-3">
+                                <Form.Control
+                                    type="text"
+                                    value={observacao}
+                                    onChange={e => {setObservacao(e.target.value)}}
+                                    placeholder="Assuntos e demais observações"
+                                    autoComplete="off"
+                                />
+                            </InputGroup>
                         </Form.Group>
-                        <Form.Group className="mb-3" controlId="formBasicPassword">
-                            <Form.Label>Telefone</Form.Label>
-                            <Form.Control type="text" placeholder="Digite o telefone do visitante" value={telefone} onChange={(e) => { setTelefone(e.target.value) }} />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formBasicPassword">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control type="text" placeholder="Digite o email do visitante" value={email} onChange={(e) => { setEmail(e.target.value) }} />
-                        </Form.Group>
+
+
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
@@ -161,32 +332,97 @@ function RegistroSaida(props) {
                         Salvar
                     </Button>
                 </Modal.Footer>
-            </Modal>
+            </Modal >
 
             <Button variant="warning" type="reset" onClick={abrirModal}>
                 Novo
             </Button>
+
+            <Form.Group className="mb-3" controlId="formBasicPassword">
+                <Form.Label>Status</Form.Label>
+                <Form.Select onChange={e => { setStatus(e.target.value) }} >
+
+                    {dadosStatus.map((status, index) => (
+                        <option key={index} value={status.id} >
+                            {status.status}
+                        </option>))}
+
+                </Form.Select>
+
+            </Form.Group>
+            <Button id="basic-addon1" onClick={buscarSaidas}>Buscar</Button>
+
+            <InputGroup className="mb-3">
+                <InputGroup.Text id="basic-addon1">Filtro de busca</InputGroup.Text>
+                <Form.Control
+                    placeholder="Digite o conteudo de busca"
+                    aria-label="Digite o conteudo de busca"
+                    aria-describedby="basic-addon1"
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                />
+            </InputGroup>
             <Table striped bordered hover >
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>CPF</th>
-                        <th>Nome Visitante</th>
-                        <th>telefone</th>
+                        <th>Status</th>
+                        <th>Tipo</th>
+                        <th>Cliente</th>
+                        <th>Motorista</th>
+                        <th>Data de Entrada</th>
+                        <th>Data de Saída</th>
                         <th>Opções</th>
                     </tr>
                 </thead>
                 <tbody>
                     {
-                        [...dados].map((vis, index) =>
+                        dadosFiltrados.map((sai, index) =>
                             <tr key={index}>
-                                <td>{vis.id}</td>
-                                <td>{vis.cpf}</td>
-                                <td>{vis.nome}</td>
-                                <td>{vis.telefone}</td>
+                                <td>{sai.id}</td>
+                                <td>{sai.status}</td>
+                                <td>{sai.tipo}</td>
+                                <td>{sai.cliente}</td>
+                                <td>{sai.motorista}</td>
+                                <td>{sai.entrada}</td>
+                                <td>{sai.saida}</td>
                                 <td>
-                                    <Button variant="secondary" onClick={() => carregarDados(vis.id)}>Atualizar</Button>{' '}
-                                    <Button variant="danger" onClick={() => deletarVisitante(vis.nome, vis.id)}>Excluir</Button>{' '}
+
+                                    <Button
+                                        variant="success"
+                                        onClick={() => encerrarRegistro(sai.nome, sai.id)}
+                                        disabled={sai.status !== 'Aberto'}
+                                    >
+                                        Encerrar
+                                    </Button>{' '}
+                                    <Button
+                                        variant="danger"
+                                        onClick={() => cancelarRegistro(sai.nome, sai.id)}
+                                        disabled={sai.status !== 'Aberto'}
+                                    >
+                                        Cancelar Visita
+                                    </Button>{' '}
+                                    <Button onClick={toggleShowA} className="mb-2">
+                                        Info Adicionais
+                                    </Button>
+                                    <Toast show={showA} onClose={toggleShowA}>
+                                        <Toast.Header>
+                                            <img
+                                                src="holder.js/20x20?text=%20"
+                                                className="rounded me-2"
+                                                alt=""
+                                            />
+                                            <strong className="me-auto">Saída: {sai.nome}</strong>
+                                        </Toast.Header>
+                                        
+                                        <Toast.Body>Observação de Entrada: {sai.assunto}</Toast.Body>
+                                        <Toast.Body>procedencia: {sai.procedencia}</Toast.Body>
+                                        <Toast.Body>Placa: {sai.placa}</Toast.Body>
+                                        <Toast.Body>Nota Fiscal: {sai.notafiscal}</Toast.Body>
+                                        <Toast.Body>Observação de Saída: {sai.obs}</Toast.Body>
+                                        
+                                    </Toast>
+
                                 </td>
                             </tr>
 
@@ -196,11 +432,8 @@ function RegistroSaida(props) {
 
                 </tbody>
             </Table>
-
-
-
         </div>
+
     )
 }
 
-export default RegistroSaida;
